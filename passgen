@@ -202,3 +202,5 @@ __END__
 Copyright 2015 Dave Webb
 
 passgen is free software. You can do B<anything> you like with it.
+
+=cut
