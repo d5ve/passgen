@@ -7,46 +7,84 @@ use warnings;
 
 passgen - generate secure-ish passwords
 
+=head1 SYNOPSIS
+
+    passgen [num words]
+
+    Examples:
+
+        # Default three-word passphrase.
+        $ passgen
+
+        # Stronger five-word passphrase.
+        $ passgen 5
+
 =head1 DESCRIPTION
 
 This perl script generates passwords/passphrases from my chosen template. This
-template is for three short words to be concatenated together. The first word
-is all lowercase, the second word is ALL UPPERCASE, and the third word uses the
-standard 'replace vowels with numbers' leetspeek transform.
+template is for three or more short words to be concatenated together. The
+first word is all lowercase, the second word is ALL UPPERCASE, and the third
+word uses the standard 'replace vowels with numbers' leetspeek transform. Any
+further words continue the pattern starting at step 1 again.
 
 For example:
 
-This is security through obscurity, as if an attacker knows the template, then
-they can easily craft a password cracker to suit.
+    legateCREEPINGc4mpf1r3              legate   creeping campfire
+    atomicPRETENSEsqu1rr3l              atomic   pretense squirrel
+    villainyPAGANd4mn3d                 villainy pagan    damned
+    ribbonCOLLOQUYm1ss1v3deceiverTHERE  ribbon   colloquy missive  deceiver there
 
 I use these passwords for signing up on various websites, and want to balance
 the ease of remembering these passwords against their worst-case crackability.
 
+I've taken the words lists from two different sources:
+
+    1) The New General Service List (NSGL)
+       http://www.newgeneralservicelist.org
+       Creative Commons Attribution 3.0 Unported License
+    2) Wiktionary.org's Project Gutenberg frequency lists. 
+       https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists#Project_Gutenberg
+       Creative Commons Attribution-ShareAlike License
+
+This is security through obscurity, as if an attacker knows the template and
+the wordlists, then they can easily craft a password cracker to suit.
+
 Three-word passwords at least have a length of 12 characters or more, and won't
 fall to the simplest dictionary attacks.
 
-Don't use these passwords for anything important.
+Don't use these passwords for anything important, however, as there just isn't
+enough entropy to be safe.
+
+For example, with the 8447 common english words used here, the number of
+passphrases is 8447 * 8447 * 8447, or 602,708,730,623. This appears a pretty
+large number, but modern password crackers can test billions of passwords per
+second, so less than ten minutes on average if the wordlists and algorithm are
+known.
+
+Even a random 8-character password made up of those characters you can easily
+enter from the keyboard has larger entropy. My keyboard allows me to easily
+enter a-zA-Z0-9 plus the punctuation and other special characters:
+!@£$%^&*()_+-={}[ ]:"|;'\<>?,./ This comes to 93 different characters, and 93^8
+(2,252,292,232,139,041) combinations, which is 9000 times as large as the number
+from the three dictionary words above, so should take 5000 times longer to
+crack.
 
 This script hasn't been audited by anyone who knows anything about password
 security.
 
-=head1 TODO
-
-=over
-
-=item * Make sure @wordlist contains no dups.
-
-=back
-
 =cut
 
 use Crypt::Random ();
+use List::MoreUtils ();
 
+my $num_words = shift || 3;
 my $wordlist = get_wordlist();
 
 for (1..20) {
-    my $words = pick_words($wordlist, 3);
-    print format_phrase($words) . " " . join(' ', @$words) . "\n";
+    my $words = pick_words($wordlist, $num_words);
+    my $max_len = $num_words * 8;
+    my $format_str = "%-${max_len}s " . '%-8s ' x @$words;
+    printf "$format_str\n", format_phrase($words),  @$words;
 }
 
 exit;
@@ -106,25 +144,34 @@ sub pick_words {
 }
 
 #
-# Read in a dictionary file from disk, and filter for length and a few other
-# things.
+# Read in a dictionary file or files from disk, and filter for length and a few
+# other things.
+#
 # die() unless enough words are found.
 #
 sub get_wordlist {
-    my @dict_files = qw(/usr/share/dict/words);
+    my @dict_files = qw(
+        ngsl.txt
+        wiktionary_words_1-10k.txt
+        wiktionary_words_10k-20k.txt
+    );
 
     my @wordlist;
     for my $file ( @dict_files ) {
         next unless -f $file;
-        
+
         open my $fh, '<', $file
             or die "FATAL: Unable to open '$file' for reading - $!";
 
         WORD: while ( my $word = <$fh> ) {
             chomp $word;
 
+            # Remove any # comment
+            $word =~ s{ \s* \# .*}{}xms;
+            next WORD unless $word;
+
             # Filter for length.
-            next WORD if length $word < 5 || length $word > 9;
+            next WORD if length $word < 4 || length $word > 8;
 
             # Filter out plurals (and any words actually ending in s).
             next WORD if substr($word, -1) eq 's'; 
@@ -137,13 +184,21 @@ sub get_wordlist {
         close $fh;
     }
 
-    die "FATAL: get_wordlist() unable to load enough words from " . join( ', ', @dict_files ) . ". Found only " . scalar @wordlist
-        unless @wordlist > 20_000;
+    die "FATAL: get_wordlist() unable to load enough words from "
+      . join( ', ', @dict_files )
+      . ". Found only "
+      . scalar @wordlist
+        unless @wordlist > 4000;
 
+    @wordlist = List::MoreUtils::uniq @wordlist;
     print "FOUND: " . scalar @wordlist . " words\n";
     return \@wordlist;
 }
 
 __END__
 
+=head1 LICENCE
 
+Copyright 2015 Dave Webb
+
+passgen is free software. You can do B<anything> you like with it.
