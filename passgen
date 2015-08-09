@@ -29,10 +29,10 @@ further words continue the pattern starting at step 1 again.
 
 For example:
 
-    legateCREEPINGc4mpf1r3              legate   creeping campfire
-    atomicPRETENSEsqu1rr3l              atomic   pretense squirrel
-    villainyPAGANd4mn3d                 villainy pagan    damned
-    ribbonCOLLOQUYm1ss1v3deceiverTHERE  ribbon   colloquy missive  deceiver there
+    hairedBROACHn33d1ng              haired  broach  needing
+    tornSTUDIOh1ll                   torn    studio  hill
+    facedBANGINGf33d1ngneutral       faced   banging feeding neutral
+    azureNEALb41t1ngtarnishCINDER    azure   neal    baiting tarnish cinder
 
 I use these passwords for signing up on various websites, and want to balance
 the ease of remembering these passwords against their worst-case crackability.
@@ -55,8 +55,8 @@ fall to the simplest dictionary attacks.
 Don't use these passwords for anything important, however, as there just isn't
 enough entropy to be safe.
 
-For example, with the 8447 common english words used here, the number of
-passphrases is 8447 * 8447 * 8447, or 602,708,730,623. This appears a pretty
+For example, with the 8544 common english words used here, the number of
+passphrases is 8544 * 8544 * 8544, or 623,711,453,184. This appears a pretty
 large number, but modern password crackers can test billions of passwords per
 second, so less than ten minutes on average if the wordlists and algorithm are
 known.
@@ -66,25 +66,35 @@ enter from the keyboard has larger entropy. My keyboard allows me to easily
 enter a-zA-Z0-9 plus the punctuation and other special characters:
 !@£$%^&*()_+-={}[ ]:"|;'\<>?,./ This comes to 93 different characters, and 93^8
 (2,252,292,232,139,041) combinations, which is 9000 times as large as the number
-from the three dictionary words above, so should take 5000 times longer to
+from the three dictionary words above, so should take 9000 times longer to
 crack.
 
 This script hasn't been audited by anyone who knows anything about password
 security.
+
+=head1 TODO
+
+=over
+
+=item * Have min/max word length and vowel numbers as commandline args.
+
+=back
 
 =cut
 
 use Crypt::Random ();
 use List::MoreUtils ();
 
-my $num_words = shift || 3;
-my $wordlist = get_wordlist();
+my $num_words    = shift || 3;
+my $min_word_len = 4;
+my $max_word_len = 7;
+my $wordlist     = get_wordlist();
 
-for (1..20) {
-    my $words = pick_words($wordlist, $num_words);
-    my $max_len = $num_words * 8;
-    my $format_str = "%-${max_len}s " . '%-8s ' x @$words;
-    printf "$format_str\n", format_phrase($words),  @$words;
+for ( 1 .. 20 ) {
+    my $words      = pick_words( $wordlist, $num_words );
+    my $max_len    = $num_words * $max_word_len;
+    my $format_str = "%-${max_len}s " . "\%-${max_word_len}s " x @$words;
+    printf "$format_str\n", format_phrase($words), @$words;
 }
 
 exit;
@@ -171,13 +181,13 @@ sub get_wordlist {
             next WORD unless $word;
 
             # Filter for length.
-            next WORD if length $word < 4 || length $word > 8;
+            next WORD if length $word < $min_word_len || length $word > $max_word_len;
 
             # Filter out plurals (and any words actually ending in s).
             next WORD if substr($word, -1) eq 's'; 
 
-            # Word must contain two of first 4 vowels.
-            next WORD unless $word =~ m{ [aeio] .* [aeio] }xms;
+            # Word must contain at least one of first 4 vowels.
+            next WORD unless $word =~ m{ [aeio] }xms;
             push @wordlist, lc $word;
         }
 
