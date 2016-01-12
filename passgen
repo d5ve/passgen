@@ -87,7 +87,7 @@ use List::MoreUtils ();
 
 my $num_words    = shift || 3;
 my $min_word_len = 4;
-my $max_word_len = 7;
+my $max_word_len = 6;
 my $wordlist     = get_wordlist();
 
 for ( 1 .. 20 ) {
