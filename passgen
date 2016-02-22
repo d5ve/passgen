@@ -14,7 +14,7 @@ passgen - generate secure-ish passwords
         Options:
             --words=    Number of words in each passphrase. Default 3.
             --min=      Minimum length of words in passphrase. Default 4.
-            --max=      Maximum length of words in passphrasr. Default 6.
+            --max=      Maximum length of words in passphrase. Default 6.
             --gen=      Number of passphrases to generate. Default 20.
              
     Examples:
@@ -82,9 +82,9 @@ as the default case. This should take about 750 million times as long to crack.
     $ passgen --words 5 --min 4 --max 8
 
 For comparison, a random 8-character password made up of 93 characters you can
-easily enter from the keyboard 5.60e15, so has far higher entropy than the
-default passphrases [--words 3 --min 4 --max 6], and far lower entropy than
-[--words 5 --min 4 --max 8].
+easily enter from the keyboard has 5.60e15 possibilities, so has far higher
+entropy than the default passphrases generated with B<--words 3 --min 4 --max
+6>, and far lower entropy than generated with B<--words 5 --min 4 --max 8>.
 
 =head1 CAVEAT
 
