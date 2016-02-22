@@ -25,6 +25,15 @@ passgen - generate secure-ish passwords
         # Stronger five-word passphrase with longer words.
         $ passgen --words 5 --min 4 --max 8
 
+=head1 INSTALLATION
+
+    # Install non-core perl dependencies.
+    $ cpanm Crypt::Random List::MoreUtils
+    # Clone from github
+    $ git clone https://github.com/d5ve/passgen.git
+    # Run.
+    $ passgen/passgen --words 5 --min 4 --max 8
+
 =head1 DESCRIPTION
 
 This perl script generates passwords/passphrases from my chosen template. This
