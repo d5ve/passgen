@@ -94,6 +94,7 @@ security.
 =cut
 
 use Crypt::Random ();
+use FindBin;
 use Getopt::Long;
 use List::MoreUtils ();
 use Pod::Usage;
@@ -198,10 +199,11 @@ sub get_wordlist {
 
     my @wordlist;
     for my $file ( @dict_files ) {
-        next unless -f $file;
+        my $full_path = $FindBin::Bin . '/' . $file;
+        next unless -f $full_path;
 
-        open my $fh, '<', $file
-            or die "FATAL: Unable to open '$file' for reading - $!";
+        open my $fh, '<', $full_path
+            or die "FATAL: Unable to open '$full_path' for reading - $!";
 
         WORD: while ( my $word = <$fh> ) {
             chomp $word;
